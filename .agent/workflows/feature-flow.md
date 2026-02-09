@@ -1,115 +1,207 @@
 ---
-description: Feature Delivery Pipeline - 全自动交付流水线
+description: Feature Delivery Pipeline - 全自动交付流水线 (Powered by Codex Dispatcher)
 ---
 
-# Feature Flow (The Executor)
+# Feature Flow v3.0 (The Executor)
 
-**PRD Driven Development** 的核心引擎。无限续航，直到所有任务完成或熔断。
+> **PRD Driven Development** 的核心引擎。
+> 整合需求确认与自动化交付，全程由 Agent 主导。
+
+---
+
+## 触发条件
+
+| 触发方式 | 说明 |
+|---------|------|
+| 用户确认 PRD 后说 "Go" / "确认" / "执行" | 自动进入 Feature Flow |
+| `/feature-flow` 或 "开始交付" | 手动触发 |
+
+---
 
 ## Phase 0: Pre-Flight Check (起飞前检查)
+
 > **Mandatory**: 每次流水线启动前必须执行。
 
-// turbo (自动执行环境检查)
-0.1. **Conflict Detection (冲突检测)**:
-   - **Run**: `git status --porcelain`
-   - **IF** 有未提交的本地修改:
-     - 询问用户: "检测到本地未提交的修改，是否 Stash 后继续？(Y/N)"
-     - **IF Y**: `git stash push -m "auto-stash-before-flow"`
-     - **IF N**: 终止流程，让用户先处理
+// turbo
+1. **冲突检测**:
+   ```bash
+   git status --porcelain
+   ```
+   - 如果有未提交的修改 → 自动 Stash:
+   ```bash
+   git stash push -m "auto-stash-before-feature-flow"
+   ```
 
-// turbo (自动创建检查点)
-0.2. **Checkpoint Creation (检查点创建)**:
-   - **Run**: `git tag checkpoint-YYYYMMDD-HHMMSS`
-   - **Output**: "✓ Checkpoint created: checkpoint-20260208-010800"
-   - **Update Memory**: 在 `active_context.md` 中记录 `last_checkpoint`
+// turbo
+2. **创建检查点**:
+   ```bash
+   git tag checkpoint-$(date +%Y%m%d-%H%M%S)
+   ```
+   - 输出: "✓ 检查点已创建" → 便于后续回滚
 
-## Phase 1: PRD 驱动 (来自 prd-crafter-pro)
-> 本阶段已由 `prd-crafter-pro` 完成，研发版 PRD 已确认后进入此流程。
+---
 
-1. **读取研发版 PRD**: `docs/prd/[feature_name]-dev.md`
-2. **加载第 1 层任务**: 10 个大任务写入 `active_context.md`
-3. **状态更新**: `task_status` → `EXECUTING`
+## Phase 1: 定位 PRD
 
-## Phase 2: 递归执行循环 (Recursive Execution Loop)
-> **3层递归拆解**: 任务 → 子任务 → 原子任务
+3. **自动发现 PRD**:
+   - 查找 `docs/prd/*-dev.md` 中最近修改的文件
+   - 如果找到多个，选择最新的
+   - 如果找不到，询问用户输入路径
+
+4. **确认 PRD**:
+   - 显示 PRD 标题和任务数量
+   - 询问用户: "准备执行此 PRD？(Y/n)"
+
+---
+
+## Phase 2: 调度执行 (核心)
+
+> 这里调用 `/codex-dispatch` workflow，采用 Agent 原生调度模式。
+
+5. **启动调度循环**:
+   - 读取 PRD → 识别下一个任务 → 构造 Prompt → 启动 Worker
+   - 监控 Worker 输出 → 处理问题 → 更新 PRD 状态
+   - 循环直到所有任务完成或遇到阻塞
+
+6. **进度汇报**:
+   - 每完成一个任务，输出简短状态:
+     ```
+     ✅ T-001 完成 (1/10)
+     ✅ T-002 完成 (2/10)
+     🚫 T-003 阻塞 - 等待用户确认架构选择
+     ⏭️ 跳过 T-004，先执行 T-005
+     ...
+     ```
+
+---
+
+## Phase 3: 完成与清理
+
+7. **验证完成状态**:
+   - 重新读取 PRD，检查所有任务状态
+   - 统计: 完成数 / 阻塞数 / 总数
+
+8. **生成总结**:
+   ```
+   🎉 Feature Flow 完成！
+   
+   📊 执行统计:
+   - 已完成: X/Y 任务
+   - 阻塞: Z 个
+   - 总耗时: ~N 分钟
+   
+   📝 阻塞任务 (如有):
+   - T-003: 等待用户确认...
+   - T-007: 数据库迁移需要 DBA 审批...
+   ```
+
+// turbo
+9. **恢复 Stash** (如果有):
+   ```bash
+   git stash pop
+   ```
+
+---
+
+## Phase 4: 异常处理
+
+### 🔴 Worker 失败
+
+- 3 次重试后仍失败 → 标记 FAILED
+- 询问用户:
+  ```
+  任务 T-00X 执行失败，是否要:
+  1. 手动调试并重试
+  2. 跳过此任务，继续其他
+  3. 回滚到检查点并停止
+  ```
+
+### 🔴 全局阻塞 (无法继续)
+
+- 当所有 PENDING 任务都被阻塞 → 无法继续
+- 列出所有阻塞原因，等待用户一一处理
+
+### 🔴 用户请求回滚
+
+- 用户说 "/rollback" 或 "回滚"
+- 执行:
+  ```bash
+  git reset --hard $(git describe --tags --abbrev=0 --match="checkpoint-*")
+  ```
+- 恢复到 Phase 0 创建的检查点
+
+---
+
+## 状态同步
+
+整个流程中，Agent 需要保持以下状态同步:
+
+| 状态源 | 更新时机 |
+|-------|---------|
+| PRD 文件 | 每个任务完成后立即更新 |
+| `active_context.md` | 每个阻塞、跳过、完成时更新 |
+| Git History | 每个任务完成后提交 |
+
+---
+
+## 使用示例
 
 ```
-FOR EACH task IN TaskQueue (第1层):
+用户: 执行这个 PRD → docs/prd/feature-x-dev.md
+
+Agent: 
+  📋 检测到 PRD: Feature X (共 8 个任务)
+  🔍 Pre-Flight Check...
+  ✓ 无未提交修改
+  ✓ 检查点 checkpoint-20260209-173200 已创建
+  
+  🚀 开始执行...
+  
+  ▶ T-001: 实现基础调度器
+    [启动 Codex Worker]
+    [监控中...]
+    ✅ 完成 (1/8)
+  
+  ▶ T-002: 实现 Worker 封装器
+    [启动 Codex Worker]
+    [监控中...]
+    ✅ 完成 (2/8)
+  
+  ▶ T-003: 实现交互式监控
+    [启动 Codex Worker]
+    🤔 Worker 提问: "监控数据存哪里？"
+    → 我来回答: "存 .agent/logs/monitor.json"
+    [重启并注入答案]
+    ✅ 完成 (3/8)
+  
+  ... (继续循环)
+  
+  🎉 Feature Flow 完成！
+  
+  📊 执行统计:
+  - 已完成: 7/8 任务
+  - 阻塞: 1 个 (T-007 需要 DBA 确认)
+  - 总耗时: ~23 分钟
+```
+
+---
+
+## 与 codex-dispatch 的关系
+
+```
+feature-flow.md (上层封装)
     │
-    ├── Step 2.1: 即时拆解 (Just-in-Time Decomposition)
-    │   ├── 判断: task 是否可在 1 小时内完成？
-    │   ├── IF YES: 标记为原子任务，直接执行
-    │   └── IF NO: 拆解为 5-10 个子任务 (第2层)
+    ├── Pre-Flight Check (Git 操作)
+    ├── PRD 发现与确认
     │
-    ├── Step 2.2: 子任务循环
-    │   FOR EACH subtask IN task.subtasks (第2层):
-    │       │
-    │       ├── 判断: subtask 是否可在 30 分钟内完成？
-    │       ├── IF YES: 直接执行
-    │       └── IF NO: 拆解为 3-5 个原子任务 (第3层)
-    │       │
-    │       └── Step 2.3: 原子任务执行
-    │           FOR EACH atom IN subtask.atoms (第3层):
-    │               ├── 编码
-    │               ├── 测试
-    │               └── 提交 (micro-commit)
-    │
-    └── Step 2.4: 大任务完成
-        ├── 合并提交: `git commit --amend` (可选)
-        └── 更新进度: `context-manager.update_progress(task, DONE)`
+    └── 调用 codex-dispatch.md ← 核心调度循环
+            │
+            ├── 读取 PRD
+            ├── 选择任务
+            ├── 启动 Worker
+            ├── 监控与干预
+            └── 更新状态
 ```
 
-// turbo (自动执行代码生成与文件写入)
-4. **Code Generation**: 根据当前原子任务生成代码。
-
-// turbo (自动执行静态检查)
-5. **Static Analysis**: `flutter analyze`
-   - **If Error**: Enter **Auto-Fix Loop** (Max 3 retries).
-
-// turbo (自动执行测试)
-6. **Testing**: `flutter test`
-   - **If Fail**: Enter **Auto-Fix Loop** (Max 3 retries).
-
-// turbo (自动检查测试覆盖率)
-7. **Coverage Check (可选)**:
-   - **Run**: `flutter test --coverage`
-   - **Threshold**: 
-     - 覆盖率 < 60%: ⚠️ 警告 (不阻塞流程)
-     - 覆盖率 < 30%: 🔴 暂停并提醒用户
-
-// turbo (自动执行提交)
-8. **Commit**: `git add . && git commit -m "feat: [Task-ID.SubID.AtomID] ..."`
-9. **Update Memory**: 调用 `context-manager` -> `update_progress` (Mark as DONE).
-
-## Phase 3: Completion
-10. **Archive**: If all tasks DONE -> Archive detailed plan to `history/task_archive_YYYYMM.md`.
-11. **Cleanup**:
-    - **Run**: `git stash pop` (如果之前 Stash 过)
-    - 删除超过 7 天的 checkpoint tags
-12. **Report**: Output "All tasks completed. Commit ID: [Hash]. Coverage: [X]%."
-
-## Auto-Fix Loop (自动修复循环)
-> 最多尝试 3 次，每次尝试都记录到 Scratchpad。
-
-```
-RETRY_COUNT = 0
-WHILE RETRY_COUNT < 3:
-    1. 读取错误日志
-    2. 分析根因
-    3. 应用修复
-    4. 重新验证
-    IF 验证通过: BREAK
-    ELSE: RETRY_COUNT++
-
-IF RETRY_COUNT == 3:
-    状态 -> BLOCKED
-    调用 `analyze-error` 工作流
-```
-
-## Rollback Command (回滚命令)
-> 当熔断后用户选择回滚时执行。
-
-1. **Find Checkpoint**: 读取 `active_context.md` 中的 `last_checkpoint`
-2. **Execute Rollback**: `git reset --hard [checkpoint-tag]`
-3. **Clean State**: 清空 Task Queue，状态 -> IDLE
-4. **Output**: "已回滚到 [checkpoint-tag]，请重新评估需求。"
+`feature-flow` 是上层封装，负责 Git 操作和用户交互。
+`codex-dispatch` 是核心调度器，负责实际的任务派发。

@@ -1,8 +1,9 @@
 ---
-session_id: system-conversion-v1
-task_status: IDLE
+session_id: dispatcher-prd-v2
+task_status: DEVELOPING (Bootstrap Phase)
 auto_fix_attempts: 0
-last_checkpoint: checkpoint-20260208-035200
+last_checkpoint: checkpoint-20260209-172100
+last_session_end: -
 stash_applied: false
 ---
 
@@ -11,31 +12,28 @@ stash_applied: false
 这里是 Agent 的"办公桌"。记录当前正在进行的任务细节。
 
 ## 1. Current Goal (当前目标)
-> **Project Transformation**: 将现有背单词项目 (`word_assistant`) 转换为面向外国人的中文学习软件。
-
-**Source Project**: `D:\Baic-Flutter-APP\word_assistant`  
-**Target**: 中文学习软件（面向外国人）  
-**Strategy**: 使用 `prd-crafter-pro` 进行多角色（产品/教育/批判）分析和递归拆解。
+> **Bootstrap Scheduler**: 手动实现 Codex Dispatcher v2.0 的核心调度器 (T-001)，以便启动自动化流水线。
 
 ## 2. Task Queue (任务队列)
 Format: `[Status] TaskID: Description (Related File)`
 
-### Phase 1: 扫描与规划 (Planning)
-- [ ] T-001: [P0] 扫描 `word_assistant` 源码，提取核心逻辑与 UI 架构
-- [ ] T-002: [P0] 启动多角色 PRD 规划 (Product/Education/Critic Experts)
-- [ ] T-003: [P0] 生成【用户版 PRD】并等待确认
-
-### Phase 2: 技术评审 (Tech Review)
-- [ ] T-004: [P1] 技术总监评审可行性
-
-### Phase 3: 递归执行 (Execution)
-- [ ] (待规划确认后拆解)
+- [✅ DONE] 更新用户版 PRD (`docs/prd/codex-dispatcher-user.md`)
+- [✅ DONE] 更新研发版 PRD (`docs/prd/codex-dispatcher-dev.md`)
+- [⏳ PENDING] **T-001: 实现基础调度器 MVP** (Bootstrap Requirement)
+- [⏳ PENDING] 更新 `/feature-flow` 工作流
+- [⏳ PENDING] T-002: 实现 Worker 封装器
+- [⏳ PENDING] T-003 ~ T-010 (自动化执行)
 
 ## 3. Scratchpad (草稿区)
-- 2026-02-08: 系统导出 (Template Mode) 已完成，准备开始新项目转换。
-- **Context Fix**: 上一次会话仅讨论了意向，未写入 Task Queue，现已修正。
+- 2026-02-09: **自举策略 (Bootstrap Strategy)**
+  - 因为自动化流水线依赖调度器，而调度器还未实现。
+  - **Plan**: 我将手动编写 `task_scheduler.py` (T-001)。
+  - **Status**: 旧的 `dispatch_task.sh` 已废弃，通过 `/feature-flow` 调用将失败。
+  - **Next**: 实现 Python 版 DAG 调度器。
 
 ## 4. History (近 5 条记录)
-1. 2026-02-08: Evolution Engine 部署完成。
-2. 2026-02-08: 系统导出 (Template) 完成。
-
+1. 2026-02-09 17:21: 提交研发版 PRD v2.0
+2. 2026-02-09 17:16: 完成技术预研 (Codex CLI JSONL)
+3. 2026-02-09 17:08: 补充用户版 PRD (协议、状态机)
+4. 2026-02-09 17:04: 进行多角色 PRD 评审
+5. 2026-02-09 17:00: 会话开始

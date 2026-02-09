@@ -132,7 +132,7 @@ antigravity_system_preview/  <-- 可复制的根目录
 
 ## 5. 配置与迁移策略 (Configuration & Migration)
 在构建系统骨架时，将执行以下迁移策略：
-1.  **数据迁移**: 扫描当前项目 (`d:\Baic-Flutter-APP\word_assistant`) 的 Rules，提取 "中文回复"、"MVVM架构" 等偏好，**预填入** 新系统的 `user_preferences.md`。
+1.  **数据迁移**: 扫描当前项目的 Rules/Instructions，提取沟通风格、架构模式等偏好，**预填入** 新系统的 `user_preferences.md`。
 2.  **通用性设计**: `workflows/feature-flow.md` 中不写死 `flutter run`，而是调用变量 `${RUN_COMMAND}` (由 `project_decisions.md` 定义)。
     *   *好处*: 拷贝到新项目，改一下配置文件就能用。
 

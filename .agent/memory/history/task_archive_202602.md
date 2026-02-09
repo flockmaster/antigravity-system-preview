@@ -23,10 +23,15 @@
 
 ## 已归档任务
 
-<!-- 
-新任务归档请追加在此处
-格式: ## Task-XXX: 标题
--->
+### 2026-02-09: Codex Task Dispatcher (系统升级)
+- **任务**: 实现 Master-Worker 架构的自动任务派发系统，集成 Codex CLI。
+- **状态**: ✅ 完成
+- **变更**:
+  - 创建 PRD 体系: `docs/prd/codex-dispatcher-dev.md` (用户版+研发版)
+  - 实现极简核心调度器: `.agent/skills/task-dispatcher/scripts/dispatch_task.sh`
+  - 集成验证工具: `.agent/skills/task-dispatcher/scripts/verify_task.sh`
+  - 集成上下文日志: `.agent/skills/task-dispatcher/scripts/log_context.sh`
+  - 更新工作流: `.agent/workflows/codex-dispatch.md`
 
 ### 2026-02-08: 系统初始化
 - **任务**: Antigravity Agent OS v2.0 框架搭建
