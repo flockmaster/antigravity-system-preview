@@ -1,0 +1,139 @@
+# ============================================================================
+# Tailwind CSS → Flutter 设计系统映射表
+# ============================================================================
+# 
+# 用途: 将 React 原型中的 Tailwind 类转换为 Flutter 设计系统引用
+# 使用: AI 在进行原型转代码时参考此文件
+# ============================================================================
+
+# 颜色映射
+colors:
+  # 品牌色
+  orange-500: AppColors.brandOrange
+  orange-600: AppColors.brandOrange
+  amber-500: AppColors.brandGold
+  yellow-500: AppColors.warning
+  
+  # 文本色
+  gray-900: AppColors.textTitle
+  gray-800: AppColors.textPrimary
+  gray-700: AppColors.textPrimary
+  gray-600: AppColors.textSecondary
+  gray-500: AppColors.textSecondary
+  gray-400: AppColors.textTertiary
+  black: AppColors.textTitle
+  "[#000]": AppColors.textTitle
+  "[#111827]": AppColors.textTitle
+  "[#374151]": AppColors.textPrimary
+  
+  # 背景色
+  white: AppColors.bgSurface
+  gray-50: AppColors.bgCanvas
+  gray-100: AppColors.bgSecondary
+  slate-50: AppColors.bgCanvas
+  slate-100: AppColors.bgSecondary
+  
+  # 功能色
+  green-500: AppColors.success
+  green-600: AppColors.success
+  red-500: AppColors.error
+  red-600: AppColors.error
+  blue-500: AppColors.info
+  blue-600: AppColors.info
+
+# 圆角映射
+radius:
+  rounded: AppDimensions.radiusXS        # 4px
+  rounded-sm: AppDimensions.radiusXS     # 4px
+  rounded-md: AppDimensions.radiusS      # 8px
+  rounded-lg: AppDimensions.radiusS      # 8px
+  rounded-xl: AppDimensions.radiusM      # 12px
+  rounded-2xl: AppDimensions.radiusL     # 16px
+  rounded-3xl: AppDimensions.radiusL     # 16px (最大标准圆角)
+  rounded-full: AppDimensions.radiusFull # 999px (胶囊/圆形)
+
+# 间距映射 (Tailwind 使用 4px 为基准单位)
+spacing:
+  # Padding / Margin
+  p-0: 0
+  p-1: AppDimensions.spaceXS   # 4px
+  p-2: AppDimensions.spaceS    # 8px
+  p-3: AppDimensions.spaceML   # 12px
+  p-4: AppDimensions.spaceM    # 16px
+  p-5: AppDimensions.spaceML   # 20px (近似)
+  p-6: AppDimensions.spaceL    # 24px
+  p-8: AppDimensions.spaceXL   # 32px
+  p-10: AppDimensions.spaceXL  # 40px (近似)
+  p-12: AppDimensions.spaceXXL # 48px
+  
+  m-0: 0
+  m-1: AppDimensions.spaceXS
+  m-2: AppDimensions.spaceS
+  m-4: AppDimensions.spaceM
+  m-6: AppDimensions.spaceL
+  m-8: AppDimensions.spaceXL
+  
+  # Gap
+  gap-1: AppDimensions.spaceXS
+  gap-2: AppDimensions.spaceS
+  gap-3: AppDimensions.spaceML
+  gap-4: AppDimensions.spaceM
+  gap-6: AppDimensions.spaceL
+  gap-8: AppDimensions.spaceXL
+
+# 字体大小映射
+typography:
+  text-xs: AppTypography.bodySmall      # 12px
+  text-sm: AppTypography.bodyMedium     # 14px
+  text-base: AppTypography.bodyLarge    # 16px
+  text-lg: AppTypography.titleSmall     # 18px
+  text-xl: AppTypography.titleMedium    # 20px
+  text-2xl: AppTypography.titleLarge    # 24px
+  text-3xl: AppTypography.headlineSmall # 30px
+  
+  # 字重
+  font-normal: FontWeight.w400
+  font-medium: FontWeight.w500
+  font-semibold: FontWeight.w600
+  font-bold: FontWeight.w700
+
+# 阴影映射
+shadows:
+  shadow-sm: AppShadows.shadowL1    # 轻微阴影
+  shadow: AppShadows.shadowL1       # 标准阴影
+  shadow-md: AppShadows.shadowL1    
+  shadow-lg: AppShadows.shadowL2    # 高悬浮阴影
+  shadow-xl: AppShadows.shadowL2
+  shadow-2xl: AppShadows.shadowL2
+
+# 布局映射
+layout:
+  flex: Row / Column
+  flex-row: Row
+  flex-col: Column
+  items-center: CrossAxisAlignment.center
+  items-start: CrossAxisAlignment.start
+  items-end: CrossAxisAlignment.end
+  justify-center: MainAxisAlignment.center
+  justify-between: MainAxisAlignment.spaceBetween
+  justify-start: MainAxisAlignment.start
+  justify-end: MainAxisAlignment.end
+  
+  # Flex 比例
+  flex-1: "Expanded(flex: 1)"
+  flex-2: "Expanded(flex: 2)"
+  
+  # 宽度
+  w-full: "double.infinity"
+  h-full: "double.infinity"
+
+# 交互组件映射
+interaction:
+  # 点击区域
+  cursor-pointer: BaicBounceButton   # 必须使用 BaicBounceButton 包裹
+  onClick: "onTap: () =>"            # React onClick -> Flutter onTap
+  
+  # 滚动
+  overflow-scroll: SingleChildScrollView
+  overflow-y-scroll: SingleChildScrollView
+  overflow-x-scroll: "SingleChildScrollView(scrollDirection: Axis.horizontal)"

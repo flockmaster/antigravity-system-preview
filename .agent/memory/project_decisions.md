@@ -1,39 +1,42 @@
 ---
-project_name: Generic Flutter Project
-last_updated: 2026-02-08
+project_name: Word Assistant (English Learning Tool)
+last_updated: 2026-02-09
 ---
 
 # Project Decisions (长期记忆 - 架构决策)
 
 这里记录本项目中不可动摇的"宪法级"技术决策。
-**更新机制**: 仅在重大架构变更（如换库、换架构）时由架构师 Agent 更新。
-**遗忘机制**: 当引入新方案替代旧方案时，旧方案移动到 `## Deprecated` 章节，一周后删除。
 
 ## 1. Tech Stack
-- SDK: Flutter
+- SDK: Flutter (v3.10.0+)
 - Language: Dart
+- Core Framework: Stacked (MVVM architecture)
 
-## 2. Architecture
+## 2. Architecture Patterns
+- **Service Locator**: GetIt + Injectable (via `app.locator.dart`)
+- **State Management**: Stacked `ViewModel` pattern
+- **Navigation**: stacked_services `NavigationService` / go_router
+- **Data Layer**: SQLite (sqflite) + Shared Preferences
+
 ## 3. Coding Standards
 - Lint: `flutter_lints`
 - Formatting: `dart format`
 - Naming: LowerCamelCase for variables, UpperCamelCase for classes.
+- Documentation: Mandatory for public APIs.
 
-## 4. Third-Party Libs (Whitelist)
-- `stacked`: (Architecture / State Management) - [推断自现有习惯]
-- `provider`: (Dependency Injection)
-- `json_serializable`: (JSON)
-- `shared_preferences`: (Local Storage)
+## 4. Third-Party Libs (Verified)
+- `stacked`: Core Architecture
+- `dio`: HTTP Client
+- `sqflite`: Local Persistence
+- `google_generative_ai`: Gemini Integration
+- `flutter_tts`: Text-to-Speech
 
-## 5. Known Issues (错误模式学习)
-> 格式: | 日期 | 错误类型 | 根因分析 | 修复方案 | 影响范围 |
+## 5. Project Roadmap
+- **Goal**: 持续优化英文单词背诵体验。
+- **Focus**: FSRS/遗忘曲线算法调优、AI 辅助内容生成（例句、讲解）。
 
-| 日期 | 错误类型 | 根因分析 | 修复方案 | 影响范围 |
-|------|---------|---------|---------|---------|
-| 2026-02-08 | (示例) Build Error | Pub 依赖缺失 | `flutter pub get` | 全局 |
-
-## 6. Deprecated (废弃决策归档)
-> 旧决策被新决策覆盖后移至此处，保留一周后删除。
-
-<!-- 格式: [DEPRECATED 日期] 原决策内容 | 替代方案 | 删除日期 -->
+## 6. Known Issues & Patterns
+| 日期 | 类型 | 描述 | 解决方案 | 状态 |
+|------|------|------|---------|------|
+| 2026-02-09 | 初始化 | 完成基础架构扫描 | 确认为 Stacked 架构 | Resolved |
 

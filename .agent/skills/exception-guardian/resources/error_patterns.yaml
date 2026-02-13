@@ -1,0 +1,176 @@
+# Flutter 错误模式库
+# ============================================================================
+# 用途: 存储已知错误模式及其解决方案，供 AI 快速匹配
+# 更新: 当错误在 exception_history.md 中达到 3 次时，自动晋升到此处
+# ============================================================================
+
+# 编译错误 (Compile-Time)
+compile_errors:
+  
+  type_mismatch:
+    pattern: "The argument type '(.+)' can't be assigned to the parameter type '(.+)'"
+    severity: error
+    causes:
+      - "String 与 int/double 混用"
+      - "可空类型未处理 (String? vs String)"
+      - "泛型类型不匹配"
+    solutions:
+      - "添加类型转换: .toString() / int.parse() / double.parse()"
+      - "处理可空类型: ?? 默认值 / ! 强制解包 / ?. 安全访问"
+      - "检查泛型参数是否一致"
+  
+  undefined_name:
+    pattern: "Undefined name '(.+)'"
+    severity: error
+    causes:
+      - "缺少 import 语句"
+      - "变量/类名拼写错误"
+      - "变量未声明"
+    solutions:
+      - "添加正确的 import 语句"
+      - "检查拼写是否正确"
+      - "确认变量已正确声明"
+  
+  invalid_override:
+    pattern: "'(.+)' isn't a valid override"
+    severity: error
+    causes:
+      - "方法签名不匹配父类"
+      - "返回类型不兼容"
+      - "参数类型/数量不匹配"
+    solutions:
+      - "检查父类方法签名并保持一致"
+      - "确保返回类型兼容 (协变)"
+      - "使用 @override 注解验证"
+  
+  const_with_non_const:
+    pattern: "A value of type '(.+)' can't be assigned to a variable of type '(.+)' because '(.+)' is not a constant"
+    severity: error
+    causes:
+      - "在 const 上下文中使用非 const 值"
+    solutions:
+      - "移除 const 关键字"
+      - "确保所有初始化值都是常量"
+
+# 运行时错误 (Runtime)
+runtime_errors:
+  
+  null_check:
+    pattern: "Null check operator used on a null value"
+    severity: critical
+    causes:
+      - "使用 ! 操作符访问 null 值"
+      - "未正确初始化变量"
+      - "API 返回 null 但未处理"
+    solutions:
+      - "添加空值检查: if (value != null)"
+      - "使用安全访问: ?."
+      - "提供默认值: ?? defaultValue"
+    prevention: "优先使用 ?. 和 ?? 而非 !"
+  
+  renderbox_not_laid_out:
+    pattern: "RenderBox was not laid out"
+    severity: high
+    causes:
+      - "ListView 在无限高度容器中"
+      - "Expanded 在 Column 无约束时使用"
+      - "Flex 布局嵌套问题"
+    solutions:
+      - "给 ListView 添加 shrinkWrap: true"
+      - "用 Expanded 包裹 ListView (在 Column 中)"
+      - "给容器指定固定高度"
+    prevention: "ListView 在 Column 中必须用 Expanded 包裹或设置 shrinkWrap"
+  
+  setState_after_dispose:
+    pattern: "setState\\(\\) called after dispose\\(\\)"
+    severity: high
+    causes:
+      - "异步操作完成后 Widget 已销毁"
+      - "延迟回调执行时页面已关闭"
+    solutions:
+      - "添加 if (mounted) 检查"
+      - "在 dispose() 中取消定时器/订阅"
+      - "使用 CancelableOperation"
+    prevention: "所有异步回调中的 setState 必须检查 mounted"
+  
+  range_error:
+    pattern: "RangeError \\(index\\): Invalid value"
+    severity: medium
+    causes:
+      - "访问空列表的索引"
+      - "索引越界"
+    solutions:
+      - "检查列表是否为空: if (list.isNotEmpty)"
+      - "验证索引范围: if (index < list.length)"
+      - "使用 elementAtOrNull 安全访问"
+
+# Flutter 特有错误
+flutter_errors:
+  
+  provider_not_found:
+    pattern: "Could not find the correct Provider"
+    severity: high
+    causes:
+      - "Provider 未在 Widget 树上层注册"
+      - "LocatorSetup 未调用或顺序错误"
+    solutions:
+      - "确认 setupLocator() 已在 main 中调用"
+      - "检查 Provider 注册是否在使用之前"
+      - "使用 locator.isRegistered<T>() 调试"
+  
+  asset_not_found:
+    pattern: "Unable to load asset"
+    severity: medium
+    causes:
+      - "资源路径错误或大小写不匹配"
+      - "pubspec.yaml 未声明 assets"
+      - "缓存问题"
+    solutions:
+      - "检查文件路径 (注意大小写)"
+      - "确认 pubspec.yaml 中 assets 配置正确"
+      - "运行 flutter clean && flutter pub get"
+  
+  network_image_failed:
+    pattern: "Failed to load network image"
+    severity: low
+    causes:
+      - "网络不可用"
+      - "图片 URL 无效"
+      - "CORS 问题 (Web)"
+    solutions:
+      - "添加网络权限 (Android)"
+      - "使用 CachedNetworkImage 处理加载失败"
+      - "提供 placeholder 和 errorWidget"
+
+# 架构违规 (Architecture)
+architecture_errors:
+  
+  viewmodel_context:
+    pattern: "BuildContext.*ViewModel"
+    severity: architecture
+    causes:
+      - "ViewModel 中使用了 BuildContext"
+    solutions:
+      - "移除 BuildContext 参数"
+      - "使用 NavigationService 替代直接导航"
+      - "使用 DialogService 替代 showDialog"
+    prevention: "ViewModel 严禁使用 BuildContext (铁律 #1)"
+  
+  hardcoded_color:
+    pattern: "Color\\(0x[0-9A-Fa-f]{8}\\)"
+    severity: architecture
+    causes:
+      - "使用硬编码颜色"
+    solutions:
+      - "替换为 AppColors.xxx"
+    prevention: "颜色必须使用 AppColors (铁律 #2)"
+  
+  navigator_direct_use:
+    pattern: "Navigator\\.(of|push|pop)"
+    severity: architecture
+    causes:
+      - "直接使用 Navigator 进行导航"
+    solutions:
+      - "使用 MapsTo() 进行导航"
+      - "使用 goBack() 返回"
+    prevention: "导航必须使用 MapsTo/goBack (铁律 #1)"

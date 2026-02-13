@@ -1,0 +1,123 @@
+name: car_owner_app
+description: 车主APP - Flutter移动端应用
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # UI & Navigation
+  cupertino_icons: ^1.0.2
+  go_router: ^12.0.0
+  lucide_icons: ^0.257.0
+  model_viewer_plus: ^1.7.2
+  
+  # State Management
+  provider: ^6.1.1 # Keeping Provider for hybrid mode
+  stacked: ^3.4.1
+  stacked_services: ^1.4.0
+  
+  # Dependency Injection
+  get_it: ^7.6.4
+  injectable: ^2.3.0
+  equatable: ^2.0.5
+  json_annotation: ^4.8.1
+  
+  # Network & Data
+  dio: ^5.3.2
+  shared_preferences: ^2.2.2
+  sqflite: ^2.3.0
+  
+  # Utils
+  path: ^1.8.3
+  intl: ^0.18.1
+  cached_network_image: ^3.4.1
+  flutter_staggered_grid_view: ^0.7.0
+  image_picker: ^1.0.4
+  faker: ^2.2.0
+  
+  # QR Code
+  qr_code_scanner: ^1.0.1
+  qr_flutter: ^4.1.0
+  permission_handler: ^11.0.1
+  
+  # Map
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  geolocator: ^13.0.2
+  url_launcher: ^6.3.1
+  
+  # Local HTTP Server for GLB models
+  shelf: ^1.4.1
+  shelf_static: ^1.1.2
+  mime: ^1.0.4
+  google_fonts: ^6.3.3
+  flutter_svg: ^2.2.3
+  
+  # AI & Camera
+  camera: ^0.10.5
+  image: ^4.1.3
+  tflite_flutter: ^0.12.1
+  easy_refresh: ^3.4.0
+  
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  test: ^1.24.0
+  
+  # Code Generation
+  build_runner: ^2.4.6
+  stacked_generator: ^1.5.0
+  injectable_generator: ^2.4.1
+  json_serializable: ^6.7.1
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon_2.png"
+  remove_alpha_ios: true
+  min_sdk_android: 21
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/models/
+    - assets/mock_data/
+    - assets/mock/
+    - assets/mock/store/
+    - assets/mock/store/products/
+    - assets/best_float16.tflite
+    - assets/data.yaml
+    - assets/fault_knowledge.json
+  
+  fonts:
+    - family: Oswald
+      fonts:
+        - asset: assets/fonts/Oswald-Variable.ttf
+          weight: 400
+        - asset: assets/fonts/Oswald-Variable.ttf
+          weight: 500
+        - asset: assets/fonts/Oswald-Variable.ttf
+          weight: 700
+        - asset: assets/fonts/Oswald-Variable.ttf
+          weight: 900
+    - family: PingFang SC
+      fonts:
+        - asset: assets/fonts/pingfang-sc-bold.ttf
+          weight: 700
+        - asset: assets/fonts/pingfang-sc-bold.ttf
+          weight: 900
+  
+

@@ -1,0 +1,140 @@
+# React → Flutter 转换规则配置
+# ============================================================================
+# 用途: 指导 AI 将 React 原型代码转换为 Flutter 代码
+# ============================================================================
+
+# 组件映射
+components:
+  # 容器类
+  div: Container
+  section: Container
+  article: Container
+  main: Scaffold.body
+  header: AppBar / Container
+  footer: BottomNavigationBar / Container
+  nav: NavigationBar
+  
+  # 文本类
+  h1: "Text + AppTypography.headlineLarge"
+  h2: "Text + AppTypography.headlineMedium"
+  h3: "Text + AppTypography.titleLarge"
+  h4: "Text + AppTypography.titleMedium"
+  p: "Text + AppTypography.bodyLarge"
+  span: Text
+  
+  # 表单类
+  input: TextField
+  textarea: TextField(maxLines: n)
+  button: BaicBounceButton
+  form: Form
+  
+  # 媒体类
+  img: OptimizedImage
+  video: VideoPlayer
+  
+  # 列表类
+  ul: Column / ListView
+  ol: Column / ListView
+  li: ListTile / Container
+  
+  # 交互类
+  a: BaicBounceButton + GestureDetector
+
+# React 组件 → Flutter 组件
+react_components:
+  # UI 库组件
+  Lucide/Icon: Icon (需要 lucide_icons 包或 Icons.xxx)
+  
+  # 常见模式
+  "map((item) => <Card>)": "ListView.builder"
+  "filter().map()": "where().map().toList()"
+
+# Hooks → ViewModel 映射
+hooks_to_viewmodel:
+  useState:
+    pattern: "const [value, setValue] = useState(initial)"
+    flutter_state: |
+      // 状态变量
+      Type _value = initial;
+      Type get value => _value;
+      
+      // Setter 方法
+      void setValue(Type newValue) {
+        _value = newValue;
+        rebuildUi();
+      }
+  
+  useEffect_fetch:
+    pattern: "useEffect(() => { fetch() }, [])"
+    flutter_method: |
+      /// 初始化方法 - 在 onViewModelReady 中调用
+      Future<void> initialise() async {
+        await runBusyFuture(_fetchData());
+      }
+  
+  useCallback:
+    pattern: "const handleClick = useCallback(() => {})"
+    flutter_method: |
+      /// 处理点击事件
+      void handleClick() {
+        // 实现逻辑
+      }
+
+# 事件处理映射
+events:
+  onClick: onTap
+  onChange: onChanged
+  onSubmit: onSubmitted
+  onScroll: "ScrollController + listener"
+  onFocus: focusNode.addListener
+  onBlur: focusNode.addListener
+
+# 常见模式转换
+patterns:
+  # 条件渲染
+  react: "{condition && <Component />}"
+  flutter: "if (condition) Component()"
+  
+  # 列表渲染
+  react: "{items.map(item => <Item key={item.id} />)}"
+  flutter: |
+    ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) => Item(item: items[index]),
+    )
+  
+  # 三元表达式
+  react: "{isLoading ? <Spinner /> : <Content />}"
+  flutter: "isLoading ? Spinner() : Content()"
+  
+  # className 条件
+  react: "className={`base ${active ? 'active' : ''}`}"
+  flutter: "decoration: BoxDecoration(color: active ? activeColor : normalColor)"
+
+# 样式属性映射
+styles:
+  # 定位
+  position-absolute: "Stack + Positioned"
+  position-relative: Stack
+  position-fixed: "Stack + Positioned (in Scaffold)"
+  
+  # Flexbox
+  flex-1: "Expanded(flex: 1)"
+  flex-grow: Expanded
+  flex-shrink: Flexible
+  
+  # 尺寸
+  w-full: "width: double.infinity"
+  h-full: "height: double.infinity"
+  w-screen: MediaQuery.of(context).size.width
+  h-screen: MediaQuery.of(context).size.height
+  
+  # 溢出
+  overflow-hidden: ClipRRect
+  overflow-scroll: SingleChildScrollView
+  overflow-auto: SingleChildScrollView
+  
+  # 边框
+  border: Border.all()
+  border-t: "Border(top: BorderSide())"
+  border-b: "Border(bottom: BorderSide())"

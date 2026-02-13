@@ -1,0 +1,201 @@
+# 🚨 BAIC 架构铁律 (STRICT MVVM - NON-NEGOTIABLE)
+
+> **版本**: v2.1.0  
+> **最后更新**: 2026-01-30  
+> **维护者**: AI + 架构组
+
+## 📋 变更日志
+
+| 版本 | 日期 | 变更内容 |
+|------|------|---------|
+| v2.1.0 | 2026-01-30 | 添加版本控制、补充缺失规则文件引用、完善工作流 |
+| v2.0.0 | 2026-01-15 | 重构圆角规范，区分 double 和 BorderRadius 类型 |
+| v1.1.0 | 2026-01-01 | 新增铁律 #9 疑问即停顿、铁律 #10 代码文档规范 |
+| v1.0.0 | 2025-12-01 | 初始版本，包含铁律 #1-#8 |
+
+---
+
+> **⚠️ AI 执行强制令**: 本文件中的所有规则均为**编译器级别的硬性约束**，违反任何一条视为**严重执行错误**。
+
+---
+
+## 🔴 铁律 1: 架构约束 (Stacked Framework) - 违反即失败
+
+* **[强制]** ViewModel **必须且只能**继承 `BaicBaseViewModel`，无例外。
+* **[强制]** View **必须且只能**使用 `ViewModelBuilder<T>.reactive()` 构建。
+* **[绝对禁止]** ViewModel 中**严禁出现** `BuildContext`、`Navigator`、`showDialog` 等任何 UI 层代码。
+* **[强制]** 页面跳转**必须且只能**调用 `MapsTo()` 方法，禁止直接使用 NavigationService。
+* **[检查点]** 每次编写 ViewModel 前，AI 必须自问："我是否违反了上述任何一条？"
+
+---
+
+## 🔴 铁律 2: UI 视觉规范 - 零容忍硬编码
+
+### 颜色规范
+* **[绝对禁止]** 使用 `Color(0xFF...)` 硬编码颜色，**唯一合法来源**是 `AppColors.xxx`。
+* **[检查点]** 代码中不应出现任何 `0xFF` 或 `Color.fromRGBO()` 等颜色构造。
+
+### 圆角规范 ⭐ 强化约束
+* **[绝对禁止]** 在业务 View 中使用 `BorderRadius.circular(数字)` 硬编码数值。
+* **[唯一合法来源]** `AppDimensions.radiusXS/S/M/L/Full` (double 类型) 或 `AppDimensions.borderRadiusXS/S/M/L/Full` (BorderRadius 类型)。
+* **[标准圆角值]**:
+  - `radiusXS = 4px` - 极小标签、内嵌图
+  - `radiusS = 8px` - 标签、辅助输入框、小图标背景
+  - `radiusM = 12px` - 功能卡片、列表项、模态窗口（硬朗风格）
+  - `radiusL = 16px` - 页面级大图卡片、Hero Card、沉浸式顶部区域
+  - `radiusFull = 999px` - 胶囊按钮、圆形功能按键
+* **[类型区分]**:
+  - 使用 `BorderRadius.circular()` 时 → 传入 `AppDimensions.radiusXXX` (double)
+  - 使用 `borderRadius:` 属性时 → 可直接用 `AppDimensions.borderRadiusXXX` (BorderRadius)
+* **[检查点]** 搜索代码中的 `circular(`，如果括号内是裸数字（如 `circular(24)`），立即违规。
+
+### 间距规范
+* **[强制]** 使用 `AppDimensions.spaceXS/S/M/ML/L/XL/XXL` 而非硬编码数值。
+* **[检查点]** `EdgeInsets.all()` 和 `SizedBox()` 中不应出现裸数字（除 0 外）。
+
+### 字体规范
+* **[强制]** 数字展示**必须使用** `AppStyles.mechanicalData` 或 `AppTypography.dataDisplayXXX` (机械字体)。
+* **[强制]** 价格展示**必须使用** `AppTypography.priceMain` 或 `AppStyles.price()`。
+
+### 交互规范
+* **[强制]** 所有可点击按钮**必须使用** `BaicBounceButton` 包裹（提供触觉反馈）。
+
+### 铁律自检
+* **[自检问题]** 编写 UI 代码后，如果发现代码中含有任何裸数字（除 0, 1, 0.5 等基础比例外），必须立即重构为 `AppDimensions` 或 `AppColors` 引用。
+* **[违规示例]**: `BorderRadius.circular(24)`, `EdgeInsets.all(16)`, `Color(0xFFFF6B00)`
+* **[正确示例]**: `BorderRadius.circular(AppDimensions.radiusL)`, `EdgeInsets.all(AppDimensions.spaceM)`, `AppColors.brandOrange`
+
+---
+
+## 🔴 铁律 3: 工作流强制前置 - 先读模板再动手
+
+* **[强制前置步骤]** 生成任何 ViewModel 前，**必须先**使用 `view_file` 读取 `templates/viewmodel_template.dart`。
+* **[执行顺序]** 读取模板 → 理解结构 → 编写代码，顺序不可颠倒。
+
+---
+
+## 🔴 铁律 4: 原型参考 - 唯一真理来源
+
+* **[唯一数据源]** `prototypes/ai_studio_app/components/ui/` 中的 React 组件是 **UI 布局和业务逻辑的唯一参考源**。
+* **[强制转换规则]** React → Flutter 转换时，**必须严格适配** Stacked 架构和 BAIC 视觉规范。
+* **[禁止]** 禁止凭空想象或参考其他来源，原型即真理。
+
+---
+
+## 🔴 铁律 5: 异常处理 - Step 0 强制执行令
+
+### 📋 强制执行检查清单 (每次遇到错误时必须执行)
+
+**[绝对优先级 - Step 0]** 当遇到**任何**编译错误、运行时异常或用户报告的 Bug 时：
+
+```
+✅ Step 0.1: 停止所有代码修改动作
+✅ Step 0.2: 读取 `exception_history.md`
+✅ Step 0.3: 识别错误模式
+✅ Step 0.4: 更新 `exception_history.md`（新增或计数+1）
+✅ Step 0.5: 检查是否达到 3 次，若是则晋升到 `prevention_rules.md`
+✅ Step 0.6: 完成上述步骤后，才允许开始修复代码
+```
+
+**[绝对禁止]** 看到错误后直接修复代码，这是**严重违规行为**。
+
+**[强制前置]** 在开始任何新功能前，**必须先**读取 `prevention_rules.md`，确保不重复已知错误。
+
+**[自检问题]** AI 必须在每次修复前自问：
+- "我是否已经记录了这个错误？"
+- "我是否查看了 prevention_rules.md？"
+- "我是否跳过了 Step 0？"
+
+---
+
+## 🔴 铁律 6: 核心基类保护 (Core Protection) - 严禁擅改
+
+* **[绝对禁止]** 严禁擅自修改 `lib/core/base/baic_base_view_model.dart`。
+* **[修改流程]** 如确有必要修改，**必须**严格遵循以下流程：
+    1.  **陈述理由**: 清晰说明由于什么原因（如：架构缺陷、重大功能缺失）必须修改基类。
+    2.  **获取许可**: 在行动前，**必须**明确询问用户并获得"同意"指令。
+* **[违规后果]** 未经允许修改基类视为**破坏系统稳定性**的严重错误。
+
+---
+
+## 🎯 执行纪律声明
+
+**AI 承诺**: 我理解上述规则为**不可违反的铁律**，任何违反都是执行失败。我将：
+1. 将规则视为**编译器约束**而非建议
+2. 严格执行 **Step 0 优先** 原则
+3. 在不确定时**停下来询问**，而非猜测执行
+
+**用户权利**: 如发现 AI 违反任何铁律，用户有权：
+1. 立即指出并要求重新执行
+2. 要求 AI 回滚错误操作
+3. 要求 AI 补充执行遗漏的步骤
+
+---
+
+## AI BEHAVIOR RULES
+
+## Feishu/Lark Integration (HIGHEST PRIORITY)
+**[CRITICAL]** When handling Feishu/Lark documents (URLs containing `feishu.cn` or `larksuite.com`):
+1.  **NEVER** use browser tools (`read_browser_page`, `open_browser_url`) or generic URL tools. They will fail due to login pages.
+2.  **ALWAYS** use the dedicated **Feishu Doc Assistant Skill**.
+    - To **READ** a doc: Run `python .agent/skills/feishu-doc-creator/scripts/read_doc.py <url>`
+    - To **CREATE** a doc: Run `python .agent/skills/feishu-doc-creator/scripts/create_doc.py <title>`
+    - To **UPDATE** a doc: Run `python .agent/skills/feishu-doc-creator/scripts/update_doc.py <url> <content>`
+3.  Do not ask the user for permissions/cookies; use the pre-configured API scripts.
+
+---
+
+## 🔴 铁律 7: 数据交互 (Data Architecture) - 接口先行
+
+* **[强制]** 所有业务数据获取**必须通过** `ApiClient` 发起网络请求。
+* **[绝对禁止]** Service 层禁止包含任何类似 `if (mock) return localData` 的本地 Mock 逻辑。
+* **[强制]** 必须使用 `MockInterceptor` 处理虚拟数据，实现业务代码零感知。
+* **[检查点]** 编写 Service 时自问："如果明天换成真实后端，我这行代码需要删吗？" 如果需要，就是违规。
+
+---
+
+## 🔴 铁律 8: 模版与基类保护 (Template Protection) - 严禁擅改
+
+* **[绝对禁止]** 严禁擅自修改项目模版中的核心规约文件及基类，包括但不限于：
+    * `.rules` (规则文件)
+    * `lib/core/base/baic_base_view_model.dart` (ViewModel基类)
+    * `lib/core/network/api_client.dart` (网络基建)
+* **[修改流程]** 如确有必要修改，**必须**遵循：
+    1. **陈述理由**: 清晰说明由于什么具体的架构缺陷或功能缺失必须修改。
+    2. **获取许可**: 在正式行动前，**必须**明确询问用户并获得“确认同意”的答复。
+* **[违规后果]** 未经许可的改动将被视为对项目稳定性的破坏。
+
+---
+
+## 🔴 铁律 9: 疑问即停顿 (Query First Strategy) - 禁止盲目猜测
+
+* **[强制]** 在开发过程中，凡是遇到以下情况，**必须立即停止工作并询问用户**：
+    * 对业务逻辑表达含糊或存在歧义之处。
+    * 对视觉还原细节（像素、间距、颜色）存在疑问。
+    * 发现现有架构/基类无法满足当前特定需求时。
+* **[禁止猜测]** 严禁在不确定的情况下擅自做决定或“脑补”业务逻辑，必须等待明确答复后方可继续。
+* **[执行原则]** 质量优先于进度，确认优先于执行。
+
+## 🔴 铁律 10: 代码文档规范 (Documentation) - 强制中文备注
+
+* **[强制]** 所有生成的代码（包括但不限于 Model 字段、ViewModel 方法、Service 接口）**必须包含完整、清晰的中文备注**。
+* **[要求]** 备注应说明：
+    * 字段的业务含义（如：商品的原价，而非仅仅写“original price”）。
+    * 方法的触发场景及核心逻辑。
+    * 异常处理的意图。
+* **[检查点]** 提交代码前自问："离了 AI，人类开发者看我的备注能瞬间明白业务意图吗？"
+
+---
+
+## 🎯 执行纪律声明
+
+**AI 承诺**: 我理解上述规则为**不可违反的铁律**，任何违反都是执行失败。我将：
+1. 将规则视为**编译器约束**而非建议
+2. 严格执行 **Step 0 优先** 原则
+3. **在不确定时停下来询问，而不是擅自猜测执行**
+4. **严格保护模版核心文件，修改必先申请**
+
+**用户权利**: 如发现 AI 违反任何铁律，用户有权：
+1. 立即指出并要求重新执行
+2. 要求 AI 回滚错误操作
+3. 要求 AI 补充执行遗漏的步骤
