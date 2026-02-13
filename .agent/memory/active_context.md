@@ -11,17 +11,17 @@ stash_applied: false
 这里是 Agent 的"办公桌"。记录当前正在进行的任务细节。
 
 ## 1. Current Goal (当前目标)
-> **Iterative Development**: 持续迭代与优化现有的英文背单词工具 (`word_assistant`)。
+> **Project Transformation**: 将现有背单词项目 (`word_assistant`) 转换为面向外国人的中文学习软件。
 
-**Project**: `word_assistant`  
-**Focus**: 英文背单词、学习排期、AI 辅助学习逻辑。
-**Strategy**: 基于现有架构进行功能增强与性能优化。
+**Source Project**: `D:\Baic-Flutter-APP\word_assistant`  
+**Target**: 中文学习软件（面向外国人）  
+**Strategy**: 使用 `prd-crafter-pro` 进行多角色（产品/教育/批判）分析和递归拆解。
 
 ## 2. Task Queue (任务队列)
 Format: `[Status] TaskID: Description (Related File)`
 
 ### Phase 1: 扫描与规划 (Planning)
-- [x] T-001: [P0] 扫描 `word_assistant` 源码，提取核心逻辑与 UI 架构 (2026-02-09)
+- [ ] T-001: [P0] 扫描 `word_assistant` 源码，提取核心逻辑与 UI 架构
 - [ ] T-002: [P0] 启动多角色 PRD 规划 (Product/Education/Critic Experts)
 - [ ] T-003: [P0] 生成【用户版 PRD】并等待确认
 
